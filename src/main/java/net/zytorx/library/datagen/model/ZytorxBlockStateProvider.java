@@ -12,16 +12,19 @@ import net.zytorx.library.block.WoodBlockCollection;
 import net.zytorx.library.datagen.reflection.FieldCollector;
 import net.zytorx.library.datagen.reflection.annotations.BlockDefinition;
 import net.zytorx.library.registry.RegisteredBlock;
+import net.zytorx.library.registry.Registrar;
+
+import java.util.Collection;
 
 public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
 
     protected final String modid;
-    private final Class<?>[] classes;
+    private final Collection<Class<?>> classes;
 
-    public ZytorxBlockStateProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, Class<?>... classes) {
+    public ZytorxBlockStateProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
         super(gen, modid, exFileHelper);
         this.modid = modid;
-        this.classes = classes;
+        this.classes = Registrar.getInstance(modid).getBlockDeclaration();
     }
 
     protected abstract void addStatesAndModels();
@@ -84,9 +87,6 @@ public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
 
     private void registerBlock(Block block, BlockDefinition data) {
         if (data.hasCustomModel()) {
-            if (data.hasItem()) {
-                simpleBlockItem(block, cubeAll(block));
-            }
             return;
         }
 

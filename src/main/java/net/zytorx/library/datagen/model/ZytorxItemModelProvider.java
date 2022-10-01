@@ -12,16 +12,19 @@ import net.zytorx.library.datagen.reflection.annotations.ItemDefinition;
 import net.zytorx.library.item.ItemArmorCollection;
 import net.zytorx.library.item.ItemToolCollection;
 import net.zytorx.library.registry.RegisteredItem;
+import net.zytorx.library.registry.Registrar;
+
+import java.util.Collection;
 
 public abstract class ZytorxItemModelProvider extends ItemModelProvider {
 
     protected final String modid;
-    protected final Class<?>[] classes;
+    protected final Collection<Class<?>> classes;
 
-    public ZytorxItemModelProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, Class<?>... classes) {
+    public ZytorxItemModelProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
         super(gen, modid, exFileHelper);
         this.modid = modid;
-        this.classes = classes;
+        this.classes = Registrar.getInstance(modid).getItemDeclaration();
     }
 
     protected abstract void addItemModels();
@@ -58,7 +61,6 @@ public abstract class ZytorxItemModelProvider extends ItemModelProvider {
 
         if (object instanceof ItemArmorCollection armorCollection) {
             registerArmorCollection(armorCollection, data);
-            return;
         }
     }
 

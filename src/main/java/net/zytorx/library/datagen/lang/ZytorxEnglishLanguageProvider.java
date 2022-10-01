@@ -11,15 +11,21 @@ import net.zytorx.library.item.ItemArmorCollection;
 import net.zytorx.library.item.ItemToolCollection;
 import net.zytorx.library.registry.RegisteredBlock;
 import net.zytorx.library.registry.RegisteredItem;
+import net.zytorx.library.registry.Registrar;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.stream.Stream;
+
 
 public abstract class ZytorxEnglishLanguageProvider extends LanguageProvider {
 
-    private final Class<?>[] classes;
+    private final Collection<Class<?>> classes;
 
-    public ZytorxEnglishLanguageProvider(DataGenerator gen, String modid, Class<?>... classes) {
+    public ZytorxEnglishLanguageProvider(DataGenerator gen, String modid) {
         super(gen, modid, "en_us");
-        this.classes = classes;
+        var registrar = Registrar.getInstance(modid);
+        this.classes = Stream.concat(registrar.getBlockDeclaration().stream(), registrar.getItemDeclaration().stream()).toList();
     }
 
     @Override

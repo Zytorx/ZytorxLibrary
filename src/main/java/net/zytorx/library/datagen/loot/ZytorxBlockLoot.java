@@ -16,14 +16,16 @@ import net.zytorx.library.datagen.reflection.annotations.BlockDefinition;
 import net.zytorx.library.registry.RegisteredBlock;
 import net.zytorx.library.registry.Registrar;
 
+import java.util.Collection;
+
 public abstract class ZytorxBlockLoot extends BlockLoot {
 
-    private final Registrar registrar;
-    private final Class<?>[] classes;
+    private final String modid;
+    private final Collection<Class<?>> classes;
 
-    public ZytorxBlockLoot(Registrar registrar, Class<?>... classes) {
-        this.registrar = registrar;
-        this.classes = classes;
+    public ZytorxBlockLoot(String modid) {
+        this.modid = modid;
+        this.classes = Registrar.getInstance(modid).getBlockDeclaration();
     }
 
     @Override
@@ -113,7 +115,7 @@ public abstract class ZytorxBlockLoot extends BlockLoot {
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return registrar.getKnownBlocks();
+        return Registrar.getInstance(modid).getKnownBlocks();
     }
 
     protected void createOreDrop(Block block, Item drop, float minDrops, float maxDrops) {

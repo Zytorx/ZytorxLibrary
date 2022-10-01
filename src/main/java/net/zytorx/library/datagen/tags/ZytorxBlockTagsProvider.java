@@ -12,14 +12,17 @@ import net.zytorx.library.block.WoodBlockCollection;
 import net.zytorx.library.datagen.reflection.FieldCollector;
 import net.zytorx.library.datagen.reflection.annotations.BlockDefinition;
 import net.zytorx.library.registry.RegisteredBlock;
+import net.zytorx.library.registry.Registrar;
+
+import java.util.Collection;
 
 public abstract class ZytorxBlockTagsProvider extends BlockTagsProvider {
 
-    private final Class<?>[] classes;
+    private final Collection<Class<?>> classes;
 
-    public ZytorxBlockTagsProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, Class<?>... classes) {
+    public ZytorxBlockTagsProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
         super(gen, modid, exFileHelper);
-        this.classes = classes;
+        this.classes = Registrar.getInstance(modid).getBlockDeclaration();
     }
 
     protected abstract void addCustomTags();
@@ -28,6 +31,7 @@ public abstract class ZytorxBlockTagsProvider extends BlockTagsProvider {
     protected final void addTags() {
 
         registerSimpleBlocks();
+        addCustomTags();
 
     }
 

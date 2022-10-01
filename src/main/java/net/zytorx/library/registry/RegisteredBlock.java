@@ -1,16 +1,13 @@
 package net.zytorx.library.registry;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.Nullable;
+import net.zytorx.library.registry.item.ToolTipBlockItem;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 public class RegisteredBlock implements ItemLike {
@@ -33,17 +30,11 @@ public class RegisteredBlock implements ItemLike {
 
     private static RegistryObject<Item> registerBlockItem(Registrar registrar, String name, RegistryObject<Block> block,
                                                           CreativeModeTab tab, boolean hasToolTip) {
-        return registrar.registerItem(name, () -> new BlockItem(block.get(), new Item.Properties().tab(tab)) {
-            @Override
-            public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
-                if (!hasToolTip) return;
-                if (Screen.hasShiftDown()) {
-                    pTooltip.add(new TranslatableComponent("tooltip." + registrar.getModId() + "." + name + ".tooltip.shift"));
-                } else {
-                    pTooltip.add(new TranslatableComponent("tooltip." + registrar.getModId() + "." + name + ".tooltip"));
-                }
-            }
-        });
+        if (!hasToolTip) {
+            return registrar.registerItem(name, () -> new BlockItem(block.get(), new Item.Properties().tab(tab)));
+        }
+
+        return registrar.registerItem(name, () -> new ToolTipBlockItem(block.get(), registrar.getModId(), name, new Item.Properties().tab(tab)));
     }
 
     public Block getBlock() {

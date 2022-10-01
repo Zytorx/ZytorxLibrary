@@ -17,19 +17,23 @@ import net.zytorx.library.block.WoodBlockCollection;
 import net.zytorx.library.datagen.reflection.FieldCollector;
 import net.zytorx.library.item.ItemArmorCollection;
 import net.zytorx.library.item.ItemToolCollection;
+import net.zytorx.library.registry.Registrar;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public abstract class ZytorxRecipeProvider extends RecipeProvider implements IConditionBuilder {
 
     protected final String modid;
-    private final Class<?>[] classes;
+    private final Collection<Class<?>> classes;
 
-    public ZytorxRecipeProvider(DataGenerator pGenerator, String modid, Class<?>... classes) {
+    public ZytorxRecipeProvider(DataGenerator pGenerator, String modid) {
         super(pGenerator);
         this.modid = modid;
-        this.classes = classes;
+        var registrar = Registrar.getInstance(modid);
+        this.classes = Stream.concat(registrar.getItemDeclaration().stream(), registrar.getBlockDeclaration().stream()).toList();
     }
 
     protected abstract void createCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer);
@@ -41,7 +45,7 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
     }
 
     private void registerCollections(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
-        FieldCollector.getCollectionsForRecipe(classes)
+        FieldCollector.getCollections(classes)
                 .forEach(collection -> registerCollection(pFinishedRecipeConsumer, collection));
     }
 
@@ -66,7 +70,6 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
 
         if (collection instanceof ItemArmorCollection armorCollection) {
             registerArmorCollection(pFinishedRecipeConsumer, armorCollection);
-            return;
         }
     }
 
