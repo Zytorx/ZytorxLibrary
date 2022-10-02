@@ -19,12 +19,18 @@ import java.util.Collection;
 public abstract class ZytorxItemModelProvider extends ItemModelProvider {
 
     protected final String modid;
-    protected final Collection<Class<?>> classes;
+    private final ZytorxTextureEnsurer textureEnsurer;
+    private final Collection<Class<?>> classes;
 
     public ZytorxItemModelProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
+        this(gen, modid, exFileHelper, new ZytorxTextureEnsurer(gen, exFileHelper));
+    }
+
+    public ZytorxItemModelProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, ZytorxTextureEnsurer textureEnsurer) {
         super(gen, modid, exFileHelper);
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getItemDeclaration();
+        this.textureEnsurer = textureEnsurer;
     }
 
     protected abstract void addItemModels();
@@ -90,12 +96,26 @@ public abstract class ZytorxItemModelProvider extends ItemModelProvider {
     protected ItemModelBuilder simpleItem(ItemLike item) {
         return withExistingParent(item.asItem().getRegistryName().getPath(),
                 new ResourceLocation("item/generated")).texture("layer0",
-                new ResourceLocation(modid, "item/" + item.asItem().getRegistryName().getPath()));
+                itemTexture(item));
     }
 
     protected ItemModelBuilder handheldItem(ItemLike item) {
         return withExistingParent(item.asItem().getRegistryName().getPath(),
                 new ResourceLocation("item/handheld")).texture("layer0",
-                new ResourceLocation(modid, "item/" + item.asItem().getRegistryName().getPath()));
+                itemTexture(item));
+    }
+
+    protected final ResourceLocation itemTexture(ItemLike item) {
+        return itemTexture(item.asItem().getRegistryName().getPath());
+    }
+
+    protected final ResourceLocation itemTexture(String item) {
+        var texture = itemTexture(modid, item);
+        textureEnsurer.ensureItemTexture(texture);
+        return texture;
+    }
+
+    public static ResourceLocation itemTexture(String modid, String item) {
+        return new ResourceLocation(modid, "item/" + item);
     }
 }

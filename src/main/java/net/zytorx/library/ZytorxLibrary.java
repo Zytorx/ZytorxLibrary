@@ -19,7 +19,6 @@ public class ZytorxLibrary {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         eventBus.addListener(this::setup);
-
     }
 
     private void setup(final FMLCommonSetupEvent event) {

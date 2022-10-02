@@ -19,12 +19,18 @@ import java.util.Collection;
 public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
 
     protected final String modid;
+    private final ZytorxTextureEnsurer textureEnsurer;
     private final Collection<Class<?>> classes;
 
     public ZytorxBlockStateProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
+        this(gen, modid, exFileHelper, new ZytorxTextureEnsurer(gen, exFileHelper));
+    }
+
+    public ZytorxBlockStateProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, ZytorxTextureEnsurer textureEnsurer) {
         super(gen, modid, exFileHelper);
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getBlockDeclaration();
+        this.textureEnsurer = textureEnsurer;
     }
 
     protected abstract void addStatesAndModels();
@@ -225,7 +231,18 @@ public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
         return block.getRegistryName().getPath();
     }
 
+    @Override
+    public ResourceLocation blockTexture(Block block) {
+        return blockTexture(block.getRegistryName().getPath());
+    }
+
     protected ResourceLocation blockTexture(String blockName) {
+        var texture = blockTexture(modid, blockName);
+        textureEnsurer.ensureBlockTexture(texture);
+        return texture;
+    }
+
+    public static ResourceLocation blockTexture(String modid, String blockName) {
         return new ResourceLocation(modid, ModelProvider.BLOCK_FOLDER + "/" + blockName);
     }
 }

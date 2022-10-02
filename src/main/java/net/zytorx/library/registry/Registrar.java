@@ -95,9 +95,10 @@ public class Registrar {
     public void register(IEventBus eventBus) {
         blocks.register(eventBus);
         items.register(eventBus);
+        eventBus.addListener(this::clientSetup);
     }
 
-    public void clientSetup(final FMLClientSetupEvent event) {
+    private void clientSetup(final FMLClientSetupEvent event) {
         FieldCollector.getCollections(WoodBlockCollection.class, blockDeclarations).forEach(woodBlockCollection -> {
             ItemBlockRenderTypes.setRenderLayer(woodBlockCollection.getDoorBlock().getBlock(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(woodBlockCollection.getTrapdoorBlock().getBlock(), RenderType.translucent());
