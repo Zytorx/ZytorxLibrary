@@ -1,6 +1,7 @@
 package net.zytorx.library.datagen.model;
 
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.FallbackResourceManager;
@@ -10,10 +11,14 @@ import net.minecraftforge.resource.ResourcePackLoader;
 import net.zytorx.library.ZytorxLibrary;
 
 import javax.annotation.Nullable;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
+
+import static net.minecraft.data.DataProvider.SHA1;
 
 public class ZytorxTextureEnsurer {
 
@@ -22,6 +27,8 @@ public class ZytorxTextureEnsurer {
     private final ExistingFileHelper exFileHelper;
     private final byte[] defaultBlockTexture;
     private final byte[] defaultItemTexture;
+
+    private HashCache cache = null;
 
     public ZytorxTextureEnsurer(DataGenerator generator, ExistingFileHelper exFileHelper) {
         this(generator, exFileHelper, null, null);
@@ -68,14 +75,26 @@ public class ZytorxTextureEnsurer {
         if (exFileHelper.exists(texture, TEXTURE)) {
             return;
         }
+
+        Path path = this.generator.getOutputFolder().resolve(
+                Paths.get(TEXTURE.getPackType().getDirectory(),
+                        texture.getNamespace(), TEXTURE.getPrefix(), texture.getPath() + TEXTURE.getSuffix()));
+
+        String hash = SHA1.hashBytes(defaultImage).toString();
+        if (cache != null && Objects.equals(cache.getHash(path), hash) && Files.exists(path)) {
+            cache.putNew(path, hash);
+            exFileHelper.trackGenerated(texture, TEXTURE);
+            return;
+        }
+
         try {
-            Path path = this.generator.getOutputFolder().resolve(
-                    Paths.get(TEXTURE.getPackType().getDirectory(),
-                            texture.getNamespace(), TEXTURE.getPrefix(), texture.getPath() + TEXTURE.getSuffix()));
-
             Files.createDirectories(path.getParent());
-            Files.write(path, defaultImage);
+            var writer = new BufferedOutputStream(Files.newOutputStream(path));
+            writer.write(defaultImage);
+            writer.flush();
+            writer.close();
 
+            cache.putNew(path, hash);
             exFileHelper.trackGenerated(texture, TEXTURE);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -92,5 +111,9 @@ public class ZytorxTextureEnsurer {
         }
 
         return location;
+    }
+
+    void setCache(HashCache cache) {
+        this.cache = cache;
     }
 }

@@ -1,6 +1,7 @@
 package net.zytorx.library.datagen.model;
 
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
@@ -14,6 +15,7 @@ import net.zytorx.library.item.ItemToolCollection;
 import net.zytorx.library.registry.RegisteredItem;
 import net.zytorx.library.registry.Registrar;
 
+import java.io.IOException;
 import java.util.Collection;
 
 public abstract class ZytorxItemModelProvider extends ItemModelProvider {
@@ -31,6 +33,12 @@ public abstract class ZytorxItemModelProvider extends ItemModelProvider {
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getItemDeclaration();
         this.textureEnsurer = textureEnsurer;
+    }
+
+    @Override
+    public void run(HashCache cache) throws IOException {
+        textureEnsurer.setCache(cache);
+        super.run(cache);
     }
 
     protected abstract void addItemModels();

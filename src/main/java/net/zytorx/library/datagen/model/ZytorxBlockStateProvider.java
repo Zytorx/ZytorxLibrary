@@ -1,6 +1,7 @@
 package net.zytorx.library.datagen.model;
 
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
@@ -14,6 +15,7 @@ import net.zytorx.library.datagen.reflection.annotations.BlockDefinition;
 import net.zytorx.library.registry.RegisteredBlock;
 import net.zytorx.library.registry.Registrar;
 
+import java.io.IOException;
 import java.util.Collection;
 
 public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
@@ -31,6 +33,12 @@ public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getBlockDeclaration();
         this.textureEnsurer = textureEnsurer;
+    }
+
+    @Override
+    public void run(HashCache cache) throws IOException {
+        textureEnsurer.setCache(cache);
+        super.run(cache);
     }
 
     protected abstract void addStatesAndModels();
