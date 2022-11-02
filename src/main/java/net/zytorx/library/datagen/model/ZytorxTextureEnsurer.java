@@ -81,9 +81,11 @@ public class ZytorxTextureEnsurer {
                         texture.getNamespace(), TEXTURE.getPrefix(), texture.getPath() + TEXTURE.getSuffix()));
 
         String hash = SHA1.hashBytes(defaultImage).toString();
-        if (cache != null && Objects.equals(cache.getHash(path), hash) && Files.exists(path)) {
-            cache.putNew(path, hash);
-            exFileHelper.trackGenerated(texture, TEXTURE);
+
+        cache.putNew(path, hash);
+        exFileHelper.trackGenerated(texture, TEXTURE);
+
+        if (Objects.equals(cache.getHash(path), hash) && Files.exists(path)) {
             return;
         }
 
@@ -93,9 +95,6 @@ public class ZytorxTextureEnsurer {
             writer.write(defaultImage);
             writer.flush();
             writer.close();
-
-            cache.putNew(path, hash);
-            exFileHelper.trackGenerated(texture, TEXTURE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
