@@ -2,7 +2,7 @@ package net.zytorx.library.datagen.model;
 
 import com.google.common.hash.HashCode;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.HashCache;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -15,6 +15,7 @@ import net.zytorx.library.ZytorxLibrary;
 import javax.annotation.Nullable;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,12 +49,16 @@ public class ZytorxTextureEnsurer {
         var resourceManager = new FallbackResourceManager(TEXTURE.getPackType(), ZytorxLibrary.MOD_ID);
         resourceManager.push(pack);
         try {
-            var blockResource = defaultBlockTexture != null ? exFileHelper.getResource(defaultBlockTexture, TEXTURE.getPackType()) : resourceManager.getResource(getTextureLocation(ZytorxBlockStateProvider.blockTexture(ZytorxLibrary.MOD_ID, "default")));
-            var itemResource = defaultItemTexture != null ? exFileHelper.getResource(defaultItemTexture, TEXTURE.getPackType()) : resourceManager.getResource(getTextureLocation(ZytorxItemModelProvider.itemTexture(ZytorxLibrary.MOD_ID, "default")));
-            blockTexture = blockResource.getInputStream().readAllBytes();
-            itemTexture = itemResource.getInputStream().readAllBytes();
-            blockResource.close();
-            itemResource.close();
+            var blockResource = defaultBlockTexture != null ? exFileHelper.getResource(defaultBlockTexture, TEXTURE.getPackType()) : resourceManager.getResource(getTextureLocation(ZytorxBlockStateProvider.blockTexture(ZytorxLibrary.MOD_ID, "default"))).get();
+            var itemResource = defaultItemTexture != null ? exFileHelper.getResource(defaultItemTexture, TEXTURE.getPackType()) : resourceManager.getResource(getTextureLocation(ZytorxItemModelProvider.itemTexture(ZytorxLibrary.MOD_ID, "default"))).get();
+            var blockStream = blockResource.open();
+            var itemStream = itemResource.open();
+
+            blockTexture = blockStream.readAllBytes();
+            itemTexture = itemStream.readAllBytes();
+
+            blockStream.close();
+            itemStream.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -84,7 +89,7 @@ public class ZytorxTextureEnsurer {
 
         cache.writeIfNeeded(path, defaultImage ,hash);
         exFileHelper.trackGenerated(texture, TEXTURE);
-
+/*
         if (Objects.equals(cache., hash) && Files.exists(path)) {
             return;
         }
@@ -97,7 +102,7 @@ public class ZytorxTextureEnsurer {
             writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 
     private static ResourceLocation getTextureLocation(ResourceLocation location) {
