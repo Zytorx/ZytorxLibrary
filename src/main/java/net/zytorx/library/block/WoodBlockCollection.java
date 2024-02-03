@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.zytorx.library.registry.RegisteredBlock;
+import net.zytorx.library.registry.RegisteredTab;
 import net.zytorx.library.registry.Registrar;
 
 import java.util.function.Supplier;
@@ -25,25 +26,28 @@ public class WoodBlockCollection extends SimpleBlockCollection {
     protected final RegisteredBlock buttonBlock;
     protected final RegisteredBlock pressurePlateBlock;
 
-    public WoodBlockCollection(Registrar registrar, String name, Supplier<Block> block,WoodType wood, CreativeModeTab tab) {
-        super(registrar, name, block, tab);
+    public WoodBlockCollection(Registrar registrar, String name, Supplier<Block> block,WoodType wood, RegisteredTab tab) {
+        this(registrar,name,block,wood,tab,-1);
+    }
+    public WoodBlockCollection(Registrar registrar, String name, Supplier<Block> block,WoodType wood, RegisteredTab tab, int tabPos) {
+        super(registrar, name, block, tab, tabPos);
         var nameWithoutSuffix = getNameWithoutSuffix(name);
         fenceBlock = registrar.createBlock(nameWithoutSuffix + FENCE_SUFFIX,
                 () -> new FenceBlock(
                         BlockBehaviour.Properties.copy(standardBlock.getBlock())),
-                tab);
+                tab,tabPos == -1?tabPos:tabPos+3);
         fenceGateBlock = registrar.createBlock(nameWithoutSuffix + FENCE_GATE_SUFFIX,
                 () -> new FenceGateBlock(
                         BlockBehaviour.Properties.copy(standardBlock.getBlock()), wood),
-                tab);
+                tab,tabPos == -1?tabPos:tabPos+4);
         doorBlock = registrar.createBlock(nameWithoutSuffix + DOOR_SUFFIX,
                 () -> new DoorBlock(
                         BlockBehaviour.Properties.copy(standardBlock.getBlock()).noOcclusion(), wood.setType()),
-                tab);
+                tab,tabPos == -1?tabPos:tabPos+5);
         trapdoorBlock = registrar.createBlock(nameWithoutSuffix + TRAPDOOR_SUFFIX,
                 () -> new TrapDoorBlock(
                         BlockBehaviour.Properties.copy(standardBlock.getBlock()).noOcclusion(), wood.setType()),
-                tab);
+                tab,tabPos == -1?tabPos:tabPos+6);
         pressurePlateBlock = registrar.createBlock(nameWithoutSuffix + PRESSURE_PLATE_SUFFIX,
                 () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING,
                         BlockBehaviour.Properties.copy(standardBlock.getBlock()),wood.setType()),
@@ -51,7 +55,7 @@ public class WoodBlockCollection extends SimpleBlockCollection {
         buttonBlock = registrar.createBlock(nameWithoutSuffix + BUTTON_SUFFIX,
                 () -> new ButtonBlock(
                         BlockBehaviour.Properties.copy(standardBlock.getBlock()),wood.setType(),30, true),
-                tab);
+                tab,tabPos == -1?tabPos:tabPos+7);
     }
 
     public RegisteredBlock getFenceBlock() {

@@ -6,6 +6,7 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.zytorx.library.registry.RegisteredItem;
+import net.zytorx.library.registry.RegisteredTab;
 import net.zytorx.library.registry.Registrar;
 
 import java.lang.reflect.Constructor;
@@ -21,36 +22,50 @@ public class ItemArmorCollection implements ItemCollection {
     protected final RegisteredItem boots;
 
 
-    public ItemArmorCollection(Registrar registrar, RegisteredItem material, ArmorMaterial tier, CreativeModeTab tab) {
-        this(ArmorItem.class,registrar, material, tier, tab);
+    public ItemArmorCollection(Registrar registrar, RegisteredItem material, ArmorMaterial tier, RegisteredTab tab) {
+        this(registrar,material,tier,tab,-1);
+    }
+    public ItemArmorCollection(Registrar registrar, RegisteredItem material, ArmorMaterial tier, RegisteredTab tab,int tabPos) {
+        this(ArmorItem.class,registrar, material, tier, tab, tabPos);
     }
 
-    public ItemArmorCollection(Registrar registrar, String customName, RegisteredItem material, ArmorMaterial tier, CreativeModeTab tab) {
-        this(ArmorItem.class,registrar,customName, material, tier, tab);
+    public ItemArmorCollection(Registrar registrar, String customName, RegisteredItem material, ArmorMaterial tier, RegisteredTab tab) {
+        this(registrar,customName,material,tier,tab,-1);
+    }
+    public ItemArmorCollection(Registrar registrar, String customName, RegisteredItem material, ArmorMaterial tier, RegisteredTab tab, int tabPos) {
+        this(ArmorItem.class,registrar,customName, material, tier, tab,tabPos);
     }
 
-    public ItemArmorCollection(Class<? extends ArmorItem> type,Registrar registrar, RegisteredItem material, ArmorMaterial tier, CreativeModeTab tab) {
-        this(type,registrar, material.getName(), material, tier, tab);
+    public ItemArmorCollection(Class<? extends ArmorItem> type,Registrar registrar, RegisteredItem material, ArmorMaterial tier, RegisteredTab tab) {
+        this(type,registrar,material,tier,tab,-1);
+    }
+    public ItemArmorCollection(Class<? extends ArmorItem> type,Registrar registrar, RegisteredItem material, ArmorMaterial tier, RegisteredTab tab, int tabPos) {
+        this(type,registrar, material.getName(), material, tier, tab, tabPos);
     }
 
     public ItemArmorCollection(Class<? extends ArmorItem> type,Registrar registrar, String customName, RegisteredItem material, ArmorMaterial tier,
-                               CreativeModeTab tab) {
+                               RegisteredTab tab) {
+        this(type,registrar,customName,material,tier,tab,-1);
+    }
+
+    public ItemArmorCollection(Class<? extends ArmorItem> type,Registrar registrar, String customName, RegisteredItem material, ArmorMaterial tier,
+                               RegisteredTab tab, int tabPos) {
         this.material = material;
 
         try {
             var constructor = type.getConstructor(ArmorMaterial.class, EquipmentSlot.class, Item.Properties.class);
 
             this.helmet = registrar.createItem(customName + "_helmet",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.HEAD), tab);
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.HEAD), tab, tabPos);
 
             this.chestplate = registrar.createItem(customName + "_chestplate",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.CHEST), tab);
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.CHEST),tab, tabPos == -1 ? tabPos: tabPos+1);
 
             this.leggings = registrar.createItem(customName + "_leggings",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.LEGS), tab);
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.LEGS),tab, tabPos == -1 ? tabPos: tabPos+2);
 
             this.boots = registrar.createItem(customName + "_boots",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.FEET), tab);
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.FEET),tab, tabPos == -1 ? tabPos: tabPos+3);
         } catch (NoSuchMethodException | MalformedParameterizedTypeException | TypeNotPresentException e) {
             throw new RuntimeException(e);
         }
