@@ -1,12 +1,15 @@
 package net.zytorx.library.datagen.model;
 
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.HashCache;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.zytorx.library.block.WoodBlockCollection;
 import net.zytorx.library.datagen.reflection.FieldCollector;
 import net.zytorx.library.datagen.reflection.annotations.ItemDefinition;
@@ -17,6 +20,7 @@ import net.zytorx.library.registry.Registrar;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class ZytorxItemModelProvider extends ItemModelProvider {
 
@@ -24,21 +28,21 @@ public abstract class ZytorxItemModelProvider extends ItemModelProvider {
     private final ZytorxTextureEnsurer textureEnsurer;
     private final Collection<Class<?>> classes;
 
-    public ZytorxItemModelProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
-        this(gen, modid, exFileHelper, new ZytorxTextureEnsurer(gen, exFileHelper));
+    public ZytorxItemModelProvider(PackOutput output, String modid, ExistingFileHelper exFileHelper) {
+        this(output, modid, exFileHelper, new ZytorxTextureEnsurer(output, exFileHelper));
     }
 
-    public ZytorxItemModelProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, ZytorxTextureEnsurer textureEnsurer) {
-        super(gen, modid, exFileHelper);
+    public ZytorxItemModelProvider(PackOutput output, String modid, ExistingFileHelper exFileHelper, ZytorxTextureEnsurer textureEnsurer) {
+        super(output, modid, exFileHelper);
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getItemDeclaration();
         this.textureEnsurer = textureEnsurer;
     }
 
     @Override
-    public void run(HashCache cache) throws IOException {
+    public CompletableFuture<?> run(CachedOutput cache) {
         textureEnsurer.setCache(cache);
-        super.run(cache);
+       return super.run(cache);
     }
 
     protected abstract void addItemModels();
@@ -102,24 +106,40 @@ public abstract class ZytorxItemModelProvider extends ItemModelProvider {
     }
 
     protected ItemModelBuilder simpleItem(ItemLike item) {
-        return withExistingParent(item.asItem().getRegistryName().getPath(),
+        var key = ForgeRegistries.ITEMS.getKey(item.asItem());
+        if(key == null){
+            return null;
+        }
+        return withExistingParent(key.getPath(),
                 new ResourceLocation("item/generated")).texture("layer0",
                 itemTexture(item));
     }
 
     protected ItemModelBuilder handheldItem(ItemLike item) {
-        return withExistingParent(item.asItem().getRegistryName().getPath(),
+        var key = ForgeRegistries.ITEMS.getKey(item.asItem());
+        if(key == null){
+            return null;
+        }
+        return withExistingParent(key.getPath(),
                 new ResourceLocation("item/handheld")).texture("layer0",
                 itemTexture(item));
     }
 
     protected final ResourceLocation itemTexture(ItemLike item) {
-        return itemTexture(item.asItem().getRegistryName().getPath());
+        var key = ForgeRegistries.ITEMS.getKey(item.asItem());
+        if(key == null){
+            return null;
+        }
+        return itemTexture(key.getPath());
     }
 
     protected final ResourceLocation itemTexture(String item) {
         var texture = itemTexture(modid, item);
-        textureEnsurer.ensureItemTexture(texture);
+        try {
+            textureEnsurer.ensureItemTexture(texture);
+        } catch (IOException e) {
+            return null;
+        }
         return texture;
     }
 

@@ -1,12 +1,15 @@
 package net.zytorx.library.datagen.model;
 
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.HashCache;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.zytorx.library.block.NormalBlockCollection;
 import net.zytorx.library.block.SimpleBlockCollection;
 import net.zytorx.library.block.WoodBlockCollection;
@@ -17,6 +20,7 @@ import net.zytorx.library.registry.Registrar;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
 
@@ -24,21 +28,25 @@ public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
     private final ZytorxTextureEnsurer textureEnsurer;
     private final Collection<Class<?>> classes;
 
-    public ZytorxBlockStateProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
-        this(gen, modid, exFileHelper, new ZytorxTextureEnsurer(gen, exFileHelper));
+    public ZytorxBlockStateProvider(PackOutput output, String modid, ExistingFileHelper exFileHelper) {
+        this(output, modid, exFileHelper, new ZytorxTextureEnsurer(output, exFileHelper));
     }
 
-    public ZytorxBlockStateProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper, ZytorxTextureEnsurer textureEnsurer) {
-        super(gen, modid, exFileHelper);
+    public ZytorxBlockStateProvider(PackOutput output, String modid, ExistingFileHelper exFileHelper, ZytorxTextureEnsurer textureEnsurer) {
+        super(output, modid, exFileHelper);
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getBlockDeclaration();
         this.textureEnsurer = textureEnsurer;
     }
 
     @Override
-    public void run(HashCache cache) throws IOException {
+    public CompletableFuture<?> run(CachedOutput cache) {
         textureEnsurer.setCache(cache);
-        super.run(cache);
+        return super.run(cache);
+    }
+
+    public void run(HashCache cache) throws IOException {
+
     }
 
     protected abstract void addStatesAndModels();
@@ -131,7 +139,7 @@ public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
         var name = name(slab);
         var bottomModel = models().slab(name, side, bottom, top);
         var topModel = models().slabTop(name + "_top", side, bottom, top);
-        var doubleModel = models().getExistingFile(base.getRegistryName());
+        var doubleModel = models().getExistingFile(ForgeRegistries.BLOCKS.getKey(base));
         slabBlock(slab, bottomModel, topModel, doubleModel);
         simpleBlockItem(slab, bottomModel);
     }
@@ -232,21 +240,37 @@ public abstract class ZytorxBlockStateProvider extends BlockStateProvider {
     }
 
     protected String name(Block block) {
-        return block.getRegistryName().toString();
+        var key = ForgeRegistries.BLOCKS.getKey(block);
+        if(key == null){
+            return null;
+        }
+        return key.toString();
     }
 
     protected String location(Block block) {
-        return block.getRegistryName().getPath();
+        var key = ForgeRegistries.BLOCKS.getKey(block);
+        if(key == null){
+            return null;
+        }
+        return key.getPath();
     }
 
     @Override
     public ResourceLocation blockTexture(Block block) {
-        return blockTexture(block.getRegistryName().getPath());
+        var key = ForgeRegistries.BLOCKS.getKey(block);
+        if(key == null){
+            return null;
+        }
+        return blockTexture(key.getPath());
     }
 
     protected ResourceLocation blockTexture(String blockName) {
         var texture = blockTexture(modid, blockName);
-        textureEnsurer.ensureBlockTexture(texture);
+        try {
+            textureEnsurer.ensureBlockTexture(texture);
+        } catch (IOException e) {
+            return null;
+        }
         return texture;
     }
 

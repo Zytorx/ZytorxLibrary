@@ -2,7 +2,8 @@ package net.zytorx.library.registry.item;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -25,9 +26,9 @@ public class ToolTipBlockItem extends BlockItem {
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
         if (Screen.hasShiftDown()) {
-            pTooltip.add(new TranslatableComponent("tooltip." + modid + "." + name + ".tooltip.shift"));
+            pTooltip.add(MutableComponent.create(new TranslatableContents("tooltip." + modid + "." + name + ".tooltip.shift",null,TranslatableContents.NO_ARGS)));
         } else {
-            pTooltip.add(new TranslatableComponent("tooltip." + modid + "." + name + ".tooltip"));
+            pTooltip.add(MutableComponent.create(new TranslatableContents("tooltip." + modid + "." + name + ".tooltip",null,TranslatableContents.NO_ARGS)));
         }
     }
 }

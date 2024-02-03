@@ -1,7 +1,9 @@
 package net.zytorx.library.datagen.model;
 
-import net.minecraft.data.DataGenerator;
+import com.google.common.hash.HashCode;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.HashCache;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.FallbackResourceManager;
@@ -18,24 +20,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import static net.minecraft.data.DataProvider.SHA1;
-
 public class ZytorxTextureEnsurer {
 
     protected static final ExistingFileHelper.ResourceType TEXTURE = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".png", "textures");
-    private final DataGenerator generator;
+    private final PackOutput output;
     private final ExistingFileHelper exFileHelper;
     private final byte[] defaultBlockTexture;
     private final byte[] defaultItemTexture;
 
-    private HashCache cache = null;
+    private CachedOutput cache = null;
 
-    public ZytorxTextureEnsurer(DataGenerator generator, ExistingFileHelper exFileHelper) {
-        this(generator, exFileHelper, null, null);
+    public ZytorxTextureEnsurer(PackOutput output, ExistingFileHelper exFileHelper) {
+        this(output, exFileHelper, null, null);
     }
 
-    public ZytorxTextureEnsurer(DataGenerator generator, ExistingFileHelper exFileHelper, @Nullable ResourceLocation defaultBlockTexture, @Nullable ResourceLocation defaultItemTexture) {
-        this.generator = generator;
+    public ZytorxTextureEnsurer(PackOutput output, ExistingFileHelper exFileHelper, @Nullable ResourceLocation defaultBlockTexture, @Nullable ResourceLocation defaultItemTexture) {
+        this.output = output;
         this.exFileHelper = exFileHelper;
         byte[] itemTexture;
         byte[] blockTexture;
@@ -46,7 +46,7 @@ public class ZytorxTextureEnsurer {
         }
         var pack = ResourcePackLoader.createPackForMod(modFileInfo);
         var resourceManager = new FallbackResourceManager(TEXTURE.getPackType(), ZytorxLibrary.MOD_ID);
-        resourceManager.add(pack);
+        resourceManager.push(pack);
         try {
             var blockResource = defaultBlockTexture != null ? exFileHelper.getResource(defaultBlockTexture, TEXTURE.getPackType()) : resourceManager.getResource(getTextureLocation(ZytorxBlockStateProvider.blockTexture(ZytorxLibrary.MOD_ID, "default")));
             var itemResource = defaultItemTexture != null ? exFileHelper.getResource(defaultItemTexture, TEXTURE.getPackType()) : resourceManager.getResource(getTextureLocation(ZytorxItemModelProvider.itemTexture(ZytorxLibrary.MOD_ID, "default")));
@@ -62,30 +62,30 @@ public class ZytorxTextureEnsurer {
         this.defaultItemTexture = itemTexture;
     }
 
-    public void ensureItemTexture(ResourceLocation textureToEnsure) {
+    public void ensureItemTexture(ResourceLocation textureToEnsure) throws IOException {
         ensureTexture(textureToEnsure, defaultItemTexture);
     }
 
-    public void ensureBlockTexture(ResourceLocation textureToEnsure) {
+    public void ensureBlockTexture(ResourceLocation textureToEnsure) throws IOException {
         ensureTexture(textureToEnsure, defaultBlockTexture);
     }
 
-    private void ensureTexture(ResourceLocation texture, byte[] defaultImage) {
+    private void ensureTexture(ResourceLocation texture, byte[] defaultImage) throws IOException {
 
         if (exFileHelper.exists(texture, TEXTURE)) {
             return;
         }
 
-        Path path = this.generator.getOutputFolder().resolve(
+        Path path = this.output.getOutputFolder().resolve(
                 Paths.get(TEXTURE.getPackType().getDirectory(),
                         texture.getNamespace(), TEXTURE.getPrefix(), texture.getPath() + TEXTURE.getSuffix()));
 
-        String hash = SHA1.hashBytes(defaultImage).toString();
+        var hash = HashCode.fromBytes(defaultImage);
 
-        cache.putNew(path, hash);
+        cache.writeIfNeeded(path, defaultImage ,hash);
         exFileHelper.trackGenerated(texture, TEXTURE);
 
-        if (Objects.equals(cache.getHash(path), hash) && Files.exists(path)) {
+        if (Objects.equals(cache., hash) && Files.exists(path)) {
             return;
         }
 
@@ -112,7 +112,7 @@ public class ZytorxTextureEnsurer {
         return location;
     }
 
-    void setCache(HashCache cache) {
+    void setCache(CachedOutput cache) {
         this.cache = cache;
     }
 }

@@ -4,7 +4,7 @@ license = "LGPL v3"
 
 [[mods]]
 modId = "zytorxlibrary"
-version = "1.18.2-0.0.4.1"
+version = "1.20.1-0.0.4.1"
 displayName = "Zytorx Library"
 authors = "Zytorx"
 logoFile = "logo.png"
@@ -19,6 +19,6 @@ side = "BOTH"
 [[dependencies.zytorxlibrary]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,1.19)"
+versionRange = "[1.20,1.21)"
 ordering = "NONE"
 side = "BOTH"

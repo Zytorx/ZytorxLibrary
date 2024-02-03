@@ -5,7 +5,9 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
@@ -14,14 +16,12 @@ import net.minecraftforge.registries.RegistryObject;
 import net.zytorx.library.block.WoodBlockCollection;
 import net.zytorx.library.datagen.reflection.FieldCollector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class Registrar {
 
+    private static final Map<CreativeModeTab, Set<ItemLike>> tabItems = new HashMap<>();
     private static final Map<String, Registrar> instances = new HashMap<>();
     private final List<Class<?>> blockDeclarations = new ArrayList<>();
     private final List<Class<?>> itemDeclarations = new ArrayList<>();
@@ -44,6 +44,19 @@ public class Registrar {
 
     public RegisteredItem createItem(String name, Supplier<? extends Item> sup) {
         return new RegisteredItem(this, name, sup);
+    }
+
+    public RegisteredItem createItem(String name, Supplier<? extends Item> sup, CreativeModeTab tab) {
+        var item = new RegisteredItem(this, name, sup);
+        registerItemToTab(tab, item);
+        return item;
+    }
+
+    private static void  registerItemToTab(CreativeModeTab tab, ItemLike item){
+        if(!tabItems.containsKey(tab)){
+            tabItems.put(tab, new HashSet<>());
+        }
+        tabItems.get(tab).add(item);
     }
 
     public RegisteredBlock createBlock(String name, Supplier<Block> block) {
@@ -120,5 +133,4 @@ public class Registrar {
     RegistryObject<Item> registerItem(String name, Supplier<? extends Item> sup) {
         return items.register(name, sup);
     }
-
 }

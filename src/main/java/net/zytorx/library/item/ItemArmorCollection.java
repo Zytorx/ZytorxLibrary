@@ -41,24 +41,24 @@ public class ItemArmorCollection implements ItemCollection {
             var constructor = type.getConstructor(ArmorMaterial.class, EquipmentSlot.class, Item.Properties.class);
 
             this.helmet = registrar.createItem(customName + "_helmet",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.HEAD, tab));
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.HEAD), tab);
 
             this.chestplate = registrar.createItem(customName + "_chestplate",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.CHEST, tab));
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.CHEST), tab);
 
             this.leggings = registrar.createItem(customName + "_leggings",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.LEGS, tab));
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.LEGS), tab);
 
             this.boots = registrar.createItem(customName + "_boots",
-                    () -> createArmorItem(constructor, tier, EquipmentSlot.FEET, tab));
+                    () -> createArmorItem(constructor, tier, EquipmentSlot.FEET), tab);
         } catch (NoSuchMethodException | MalformedParameterizedTypeException | TypeNotPresentException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static <T extends ArmorItem> T createArmorItem(Constructor<T> constructor, ArmorMaterial tier, EquipmentSlot slot, CreativeModeTab tab) {
+    private static <T extends ArmorItem> T createArmorItem(Constructor<T> constructor, ArmorMaterial tier, EquipmentSlot slot) {
         try {
-            return constructor.newInstance(tier, slot, new Item.Properties().tab(tab));
+            return constructor.newInstance(tier, slot, new Item.Properties());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

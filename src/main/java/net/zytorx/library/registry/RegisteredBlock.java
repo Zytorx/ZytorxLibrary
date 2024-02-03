@@ -28,13 +28,13 @@ public class RegisteredBlock implements ItemLike {
         return registeredBlock;
     }
 
-    private static RegistryObject<Item> registerBlockItem(Registrar registrar, String name, RegistryObject<Block> block,
+    private static RegisteredItem registerBlockItem(Registrar registrar, String name, RegistryObject<Block> block,
                                                           CreativeModeTab tab, boolean hasToolTip) {
         if (!hasToolTip) {
-            return registrar.registerItem(name, () -> new BlockItem(block.get(), new Item.Properties().tab(tab)));
+            return registrar.createItem(name, () -> new BlockItem(block.get(), new Item.Properties()),tab);
         }
 
-        return registrar.registerItem(name, () -> new ToolTipBlockItem(block.get(), registrar.getModId(), name, new Item.Properties().tab(tab)));
+        return registrar.createItem(name, () -> new ToolTipBlockItem(block.get(), registrar.getModId(), name, new Item.Properties()),tab);
     }
 
     public Block getBlock() {

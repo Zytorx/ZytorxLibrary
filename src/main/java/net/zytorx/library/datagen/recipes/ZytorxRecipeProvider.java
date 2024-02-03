@@ -1,11 +1,13 @@
 package net.zytorx.library.datagen.recipes;
 
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCookingSerializer;
@@ -29,8 +31,8 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
     protected final String modid;
     private final Collection<Class<?>> classes;
 
-    public ZytorxRecipeProvider(DataGenerator pGenerator, String modid) {
-        super(pGenerator);
+    public ZytorxRecipeProvider(PackOutput output, String modid) {
+        super(output);
         this.modid = modid;
         var registrar = Registrar.getInstance(modid);
         this.classes = Stream.concat(registrar.getItemDeclaration().stream(), registrar.getBlockDeclaration().stream()).toList();
@@ -39,7 +41,7 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
     protected abstract void createCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer);
 
     @Override
-    protected final void buildCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
+    protected void buildRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
         registerCollections(pFinishedRecipeConsumer);
         createCraftingRecipes(pFinishedRecipeConsumer);
     }
@@ -108,7 +110,7 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
     }
 
     protected void slabRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike slab) {
-        slabBuilder(slab, Ingredient.of(material)).unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(slab)));
+        slabBuilder(RecipeCategory.BUILDING_BLOCKS,slab, Ingredient.of(material)).unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(slab)));
     }
 
     protected void stairsRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike stairs) {
@@ -116,7 +118,7 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
     }
 
     protected void wallRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike wall) {
-        wallBuilder(wall, Ingredient.of(material)).unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(wall)));
+        wallBuilder(RecipeCategory.DECORATIONS,wall, Ingredient.of(material)).unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(wall)));
     }
 
     protected void fenceRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike fence) {
@@ -140,44 +142,44 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
     }
 
     protected void swordRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike sword) {
-        ShapedRecipeBuilder.shaped(sword).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("#").pattern("#").pattern("s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(sword)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT,sword).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("#").pattern("#").pattern("s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(sword)));
     }
 
     protected void axeRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike axe) {
-        ShapedRecipeBuilder.shaped(axe).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("##").pattern("#s").pattern(" s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(axe)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS,axe).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("##").pattern("#s").pattern(" s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(axe)));
     }
 
     protected void pickaxeRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike pickaxe) {
-        ShapedRecipeBuilder.shaped(pickaxe).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("###").pattern(" s ").pattern(" s ").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(pickaxe)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS,pickaxe).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("###").pattern(" s ").pattern(" s ").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(pickaxe)));
     }
 
     protected void shovelRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike shovel) {
-        ShapedRecipeBuilder.shaped(shovel).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("#").pattern("s").pattern("s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(shovel)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS,shovel).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("#").pattern("s").pattern("s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(shovel)));
     }
 
     protected void hoeRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike hoe) {
-        ShapedRecipeBuilder.shaped(hoe).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("##").pattern(" s").pattern(" s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(hoe)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS,hoe).define('#', Ingredient.of(material)).define('s', Ingredient.of(Items.STICK)).pattern("##").pattern(" s").pattern(" s").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(hoe)));
     }
 
     protected void helmetRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike helmet) {
-        ShapedRecipeBuilder.shaped(helmet).define('#', Ingredient.of(material)).pattern("###").pattern("# #").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(helmet)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT,helmet).define('#', Ingredient.of(material)).pattern("###").pattern("# #").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(helmet)));
     }
 
     protected void chestplateRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike chestplate) {
-        ShapedRecipeBuilder.shaped(chestplate).define('#', Ingredient.of(material)).pattern("# #").pattern("###").pattern("###").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(chestplate)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT,chestplate).define('#', Ingredient.of(material)).pattern("# #").pattern("###").pattern("###").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(chestplate)));
     }
 
     protected void leggingsRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike leggings) {
-        ShapedRecipeBuilder.shaped(leggings).define('#', Ingredient.of(material)).pattern("###").pattern("# #").pattern("# #").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(leggings)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT,leggings).define('#', Ingredient.of(material)).pattern("###").pattern("# #").pattern("# #").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(leggings)));
     }
 
     protected void bootsRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike material, ItemLike boots) {
-        ShapedRecipeBuilder.shaped(boots).define('#', Ingredient.of(material)).pattern("# #").pattern("# #").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(boots)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT,boots).define('#', Ingredient.of(material)).pattern("# #").pattern("# #").unlockedBy(getHasName(material), has(material)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(boots)));
     }
 
     protected void nineBlockStorageRecipe(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ItemLike pUnpacked, ItemLike pPacked) {
-        ShapelessRecipeBuilder.shapeless(pUnpacked, 9).requires(pPacked).unlockedBy(getHasName(pPacked), has(pPacked)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(pUnpacked)));
-        ShapedRecipeBuilder.shaped(pPacked).define('#', pUnpacked).pattern("###").pattern("###").pattern("###").unlockedBy(getHasName(pUnpacked), has(pUnpacked)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(pPacked)));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,pUnpacked, 9).requires(pPacked).unlockedBy(getHasName(pPacked), has(pPacked)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(pUnpacked)));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC,pPacked).define('#', pUnpacked).pattern("###").pattern("###").pattern("###").unlockedBy(getHasName(pUnpacked), has(pUnpacked)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getSimpleRecipeName(pPacked)));
     }
 
     protected void oreSmeltingAndBlasting(Consumer<FinishedRecipe> pFinishedRecipeConsumer, List<ItemLike> pItems, ItemLike pOutput, float pExperience, int pCookingTime, String pName) {
@@ -193,9 +195,9 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
         oreCooking(pFinishedRecipeConsumer, RecipeSerializer.BLASTING_RECIPE, pIngredients, pResult, pExperience, pCookingTime, pGroup, "_from_blasting", modid);
     }
 
-    protected void oreCooking(Consumer<FinishedRecipe> pFinishedRecipeConsumer, SimpleCookingSerializer<?> pCookingSerializer, List<ItemLike> pIngredients, ItemLike pResult, float pExperience, int pCookingTime, String pGroup, String pRecipeName, String modid) {
+    protected void oreCooking(Consumer<FinishedRecipe> pFinishedRecipeConsumer, RecipeSerializer<? extends AbstractCookingRecipe> pCookingSerializer, List<ItemLike> pIngredients, ItemLike pResult, float pExperience, int pCookingTime, String pGroup, String pRecipeName, String modid) {
         for (ItemLike itemlike : pIngredients) {
-            SimpleCookingRecipeBuilder.cooking(Ingredient.of(itemlike), pResult, pExperience, pCookingTime, pCookingSerializer).group(pGroup).unlockedBy(getHasName(itemlike), has(itemlike)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getItemName(pResult) + pRecipeName + "_" + getItemName(itemlike)));
+            SimpleCookingRecipeBuilder.generic(Ingredient.of(itemlike), RecipeCategory.MISC, pResult, pExperience, pCookingTime, pCookingSerializer).group(pGroup).unlockedBy(getHasName(itemlike), has(itemlike)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getItemName(pResult) + pRecipeName + "_" + getItemName(itemlike)));
         }
     }
 
@@ -212,8 +214,8 @@ public abstract class ZytorxRecipeProvider extends RecipeProvider implements ICo
         oreCooking(pFinishedRecipeConsumer, RecipeSerializer.BLASTING_RECIPE, ingredient, pResult, pExperience, pCookingTime, pGroup, "_from_blasting");
     }
 
-    protected void oreCooking(Consumer<FinishedRecipe> pFinishedRecipeConsumer, SimpleCookingSerializer<?> pCookingSerializer, TagKey<Item> ingredient, ItemLike pResult, float pExperience, int pCookingTime, String pGroup, String pRecipeName) {
-        SimpleCookingRecipeBuilder.cooking(Ingredient.of(ingredient), pResult, pExperience, pCookingTime, pCookingSerializer).group(pGroup).unlockedBy(getHasName(ingredient), has(ingredient)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getItemName(pResult) + pRecipeName + "_" + getTagName(ingredient)));
+    protected void oreCooking(Consumer<FinishedRecipe> pFinishedRecipeConsumer, RecipeSerializer<? extends AbstractCookingRecipe> pCookingSerializer, TagKey<Item> ingredient, ItemLike pResult, float pExperience, int pCookingTime, String pGroup, String pRecipeName) {
+        SimpleCookingRecipeBuilder.generic(Ingredient.of(ingredient), RecipeCategory.MISC, pResult, pExperience, pCookingTime, pCookingSerializer).group(pGroup).unlockedBy(getHasName(ingredient), has(ingredient)).save(pFinishedRecipeConsumer, new ResourceLocation(modid, getItemName(pResult) + pRecipeName + "_" + getTagName(ingredient)));
     }
 
     protected String getTagName(TagKey<Item> tag) {

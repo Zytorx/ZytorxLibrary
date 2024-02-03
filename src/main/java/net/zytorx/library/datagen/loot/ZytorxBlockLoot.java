@@ -1,6 +1,8 @@
 package net.zytorx.library.datagen.loot;
 
-import net.minecraft.data.loot.BlockLoot;
+import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.world.flag.FeatureFlagRegistry;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
@@ -17,19 +19,24 @@ import net.zytorx.library.registry.RegisteredBlock;
 import net.zytorx.library.registry.Registrar;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-public abstract class ZytorxBlockLoot extends BlockLoot {
+public abstract class ZytorxBlockLoot extends BlockLootSubProvider {
 
     private final String modid;
     private final Collection<Class<?>> classes;
 
+    private static final Set<Item> explosionResistant = new HashSet<>();
+
     public ZytorxBlockLoot(String modid) {
+        super(explosionResistant, FeatureFlags.REGISTRY.allFlags());
         this.modid = modid;
         this.classes = Registrar.getInstance(modid).getBlockDeclaration();
     }
 
     @Override
-    protected final void addTables() {
+    protected void generate() {
         registerSimpleBlocks();
         addBlockTables();
     }

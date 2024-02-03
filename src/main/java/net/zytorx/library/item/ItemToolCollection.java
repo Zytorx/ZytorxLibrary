@@ -21,23 +21,23 @@ public class ItemToolCollection implements ItemCollection {
         this.material = material;
         this.sword = registrar.createItem(customName + "_sword",
                 () -> new SwordItem(tier, 3, -2.4F,
-                        new Item.Properties().tab(tab)));
+                        new Item.Properties()));
 
         this.pickaxe = registrar.createItem(customName + "_pickaxe",
                 () -> new PickaxeItem(tier, 1, -2.8F,
-                        new Item.Properties().tab(tab)));
+                        new Item.Properties()),tab);
 
         this.axe = registrar.createItem(customName + "_axe",
                 () -> new AxeItem(tier, 6.0F, -3.2F,
-                        new Item.Properties().tab(tab)));
+                        new Item.Properties()), tab);
 
         this.shovel = registrar.createItem(customName + "_shovel",
                 () -> new ShovelItem(tier, 1.5F, -3.0F,
-                        new Item.Properties().tab(tab)));
+                        new Item.Properties()), tab);
 
         this.hoe = registrar.createItem(customName + "_hoe",
                 () -> new HoeItem(tier, (int) -tier.getAttackDamageBonus(), -Tiers.NETHERITE.getLevel() + tier.getLevel(),
-                        new Item.Properties().tab(tab)));
+                        new Item.Properties()), tab);
     }
 
     public RegisteredItem getMaterial() {

@@ -1,6 +1,7 @@
 package net.zytorx.library.datagen.lang;
 
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.LanguageProvider;
 import net.zytorx.library.block.NormalBlockCollection;
 import net.zytorx.library.block.SimpleBlockCollection;
@@ -22,8 +23,8 @@ public abstract class ZytorxEnglishLanguageProvider extends LanguageProvider {
 
     private final Collection<Class<?>> classes;
 
-    public ZytorxEnglishLanguageProvider(DataGenerator gen, String modid) {
-        super(gen, modid, "en_us");
+    public ZytorxEnglishLanguageProvider(PackOutput output, String modid) {
+        super(output, modid, "en_us");
         var registrar = Registrar.getInstance(modid);
         this.classes = Stream.concat(registrar.getBlockDeclaration().stream(), registrar.getItemDeclaration().stream()).toList();
     }

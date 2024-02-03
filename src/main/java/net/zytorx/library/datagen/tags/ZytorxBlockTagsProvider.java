@@ -1,10 +1,12 @@
 package net.zytorx.library.datagen.tags;
 
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.zytorx.library.block.NormalBlockCollection;
 import net.zytorx.library.block.SimpleBlockCollection;
@@ -15,20 +17,21 @@ import net.zytorx.library.registry.RegisteredBlock;
 import net.zytorx.library.registry.Registrar;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class ZytorxBlockTagsProvider extends BlockTagsProvider {
 
     private final Collection<Class<?>> classes;
 
-    public ZytorxBlockTagsProvider(DataGenerator gen, String modid, ExistingFileHelper exFileHelper) {
-        super(gen, modid, exFileHelper);
+    public ZytorxBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> pLookupProvider, String modid, ExistingFileHelper exFileHelper) {
+        super(output, pLookupProvider, modid, exFileHelper);
         this.classes = Registrar.getInstance(modid).getBlockDeclaration();
     }
 
     protected abstract void addCustomTags();
 
     @Override
-    protected final void addTags() {
+    protected final void addTags(HolderLookup.Provider pProvider) {
 
         registerSimpleBlocks();
         addCustomTags();
